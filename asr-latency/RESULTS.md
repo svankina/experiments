@@ -11,18 +11,18 @@ engine via `python3 -m bench.offline --engine ...`, aggregate with `analyze.py`.
 
 WER is first-party, word-level (Levenshtein on lowercased, punctuation-stripped words), against
 the references in `audio/manifest.json` (clean = 470 ref words, other = 417 ref words).
-Median latency = median wall-clock to transcribe a clip (length-dependent); Real-Time Factor =
+Median response time = median wall-clock to transcribe a clip (length-dependent); Real-Time Factor =
 processing time ÷ audio duration (length-normalized, the cleaner speed metric). Both are shown.
 
 ### Tested (this machine)
 
 **🏆 Parakeet TDT 0.6b-v2 wins:** lowest WER on both splits *and* fastest offline (lowest median
-latency + RTF). Nemotron leads only on native streaming latency (next section); for offline
+response time + RTF). Nemotron leads only on native streaming latency (next section); for offline
 transcription Parakeet is the top model on every axis.
 
-| model                              | params | median latency | Real-Time Factor | WER clean | WER other |
-| ---------------------------------- | ------ | -------------- | ---------------- | --------- | --------- |
-| **parakeet-tdt-0.6b-v2** 🏆        | 600M   | **80 ms**      | **0.013**        | **1.28%** | **2.16%** |
+| model                              | params | median response | Real-Time Factor | WER clean | WER other |
+| ---------------------------------- | ------ | --------------- | ---------------- | --------- | --------- |
+| **parakeet-tdt-0.6b-v2** 🏆        | 600M   | **80 ms**       | **0.013**        | **1.28%** | **2.16%** |
 | nemotron-speech-streaming-en-0.6b  | 600M   | 84 ms          | 0.013            | 1.91%     | 4.32%     |
 | faster-whisper small               | 244M   | 235 ms         | 0.035            | 1.91%     | 4.80%     |
 | faster-whisper medium              | 769M   | 373 ms         | 0.054            | 7.02% ⚠   | 4.80%     |
