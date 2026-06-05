@@ -1,0 +1,49 @@
+# Two ASR engines, each GPU-enabled, both mounting the same bench/ harness + shared
+# audio/results/HF-cache volumes. Requires nvidia-container-toolkit on the host
+# (see ../CLAUDE.md). Run engines one at a time so they don't contend for the GPU:
+#
+#   command docker compose build
+#   command docker compose run --rm faster-whisper python3 -m bench.datasets fetch --n 8
+#   command docker compose run --rm faster-whisper python3 -m bench.offline --engine faster-whisper --model large-v3
+#   command docker compose run --rm nemotron      python3 -m bench.offline --engine nemotron
+#   command docker compose run --rm faster-whisper python3 analyze.py
+
+x-gpu: &gpu
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
+x-volumes: &shared-volumes
+  - ./bench:/work/bench
+  - ./analyze.py:/work/analyze.py
+  - ./audio:/work/audio
+  - ./results:/work/results
+  - ${HF_CACHE:-${HOME}/.cache/huggingface}:/hf_cache
+
+services:
+  faster-whisper:
+    build:
+      context: .
+      dockerfile: engines/faster-whisper/Dockerfile
+    image: asr-latency/faster-whisper
+    <<: *gpu
+    volumes: *shared-volumes
+    environment:
+      - BENCH_AUDIO_DIR=/work/audio
+      - BENCH_RESULTS_DIR=/work/results
+
+  nemotron:
+    build:
+      context: .
+      dockerfile: engines/nemotron-asr/Dockerfile
+    image: asr-latency/nemotron
+    <<: *gpu
+    ipc: host
+    volumes: *shared-volumes
+    environment:
+      - BENCH_AUDIO_DIR=/work/audio
+      - BENCH_RESULTS_DIR=/work/results
