@@ -3,7 +3,7 @@
 RTX 3090 Ti · batch=1 · FP16 · 30 LibriSpeech clips (15 clean + 15 other, 887 ref words).
 
 **🏆 Winner: Parakeet TDT 0.6b-v2** — best accuracy (lowest WER) *and* fastest offline
-(lowest median latency / RTF). Nemotron wins only on native streaming latency (Parakeet
+(lowest median response time / RTF). Nemotron wins only on native streaming latency (Parakeet
 has no native streaming path); for offline transcription Parakeet leads on every axis.
 
 | Model | params | Median Response Time (ms) | RTF | WER | TTFT (ms) | Final Lag (ms) |
