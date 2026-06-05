@@ -11,19 +11,22 @@ engine via `python3 -m bench.offline --engine ...`, aggregate with `analyze.py`.
 
 WER is first-party, word-level (Levenshtein on lowercased, punctuation-stripped words), against
 the references in `audio/manifest.json` (clean = 470 ref words, other = 417 ref words).
-Real-Time Factor = processing time ÷ audio duration (lower = faster). We report RTF rather than raw
-per-clip ms because raw ms is length-dependent (a longer clip simply takes longer); RTF normalizes
-it out and is the right offline-speed metric.
+Median latency = median wall-clock to transcribe a clip (length-dependent); Real-Time Factor =
+processing time ÷ audio duration (length-normalized, the cleaner speed metric). Both are shown.
 
 ### Tested (this machine)
 
-| model                              | params | Real-Time Factor | WER clean | WER other |
-| ---------------------------------- | ------ | ---------------- | --------- | --------- |
-| parakeet-tdt-0.6b-v2               | 600M   | 0.013            | 1.28%     | 2.16%     |
-| nemotron-speech-streaming-en-0.6b  | 600M   | 0.013            | 1.91%     | 4.32%     |
-| faster-whisper small               | 244M   | 0.035            | 1.91%     | 4.80%     |
-| faster-whisper medium              | 769M   | 0.054            | 7.02% ⚠   | 4.80%     |
-| faster-whisper large-v3            | 1.55B  | 0.065            | 0.85%     | 2.88%     |
+**🏆 Parakeet TDT 0.6b-v2 wins:** lowest WER on both splits *and* fastest offline (lowest median
+latency + RTF). Nemotron leads only on native streaming latency (next section); for offline
+transcription Parakeet is the top model on every axis.
+
+| model                              | params | median latency | Real-Time Factor | WER clean | WER other |
+| ---------------------------------- | ------ | -------------- | ---------------- | --------- | --------- |
+| **parakeet-tdt-0.6b-v2** 🏆        | 600M   | **80 ms**      | **0.013**        | **1.28%** | **2.16%** |
+| nemotron-speech-streaming-en-0.6b  | 600M   | 84 ms          | 0.013            | 1.91%     | 4.32%     |
+| faster-whisper small               | 244M   | 235 ms         | 0.035            | 1.91%     | 4.80%     |
+| faster-whisper medium              | 769M   | 373 ms         | 0.054            | 7.02% ⚠   | 4.80%     |
+| faster-whisper large-v3            | 1.55B  | 431 ms         | 0.065            | 0.85%     | 2.88%     |
 
 ### Published (model cards / literature)
 
@@ -46,8 +49,9 @@ re-transcribed the first half (70 output words vs 47 reference → 24 insertion 
 swings a 470-word sample ~5 points. small / large-v3 / Nemotron / Parakeet all handled it cleanly.
 
 **Takeaways:**
-- **Parakeet is the standout:** best WER on *both* splits and tied-fastest (RTF 0.013). Parakeet
-  and Nemotron — both 600M NeMo models — are ~4–5× lower RTF than Whisper large-v3.
+- **🏆 Parakeet is the winner:** best WER on *both* splits *and* fastest offline (80 ms median,
+  RTF 0.013). Parakeet and Nemotron — both 600M NeMo models — are ~4–5× lower RTF than Whisper
+  large-v3; Parakeet edges Nemotron on both accuracy and offline speed.
 - **Our WER runs below published** almost everywhere — expected, since 30 clips is a small, easier
   subset of the full ~5.4 h test sets. The *ordering and relative gaps* are the signal, not absolute
   parity with published full-set numbers.
